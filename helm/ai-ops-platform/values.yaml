@@ -1,0 +1,27 @@
+replicaCount: 2
+
+image:
+  repository: ai-ops-platform
+  tag: "v1.0.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "500m"
+
+env:
+  APP_ENV: production
+  LOG_LEVEL: info
+
+anthropicApiKeySecret:
+  name: ai-ops-secrets
+  key: anthropic-api-key
