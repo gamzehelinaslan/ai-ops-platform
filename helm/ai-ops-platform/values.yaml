@@ -34,4 +34,5 @@ hpa:
   memoryUtilization: 80
 
 ingress:
+  enabled: false
   host: ai-ops.local
