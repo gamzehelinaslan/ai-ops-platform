@@ -25,3 +25,12 @@ env:
 anthropicApiKeySecret:
   name: ai-ops-secrets
   key: anthropic-api-key
+
+hpa:
+  minReplicas: 2
+  maxReplicas: 10
+  cpuUtilization: 70
+  memoryUtilization: 80
+
+ingress:
+  host: ai-ops.local
