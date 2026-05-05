@@ -27,6 +27,7 @@ anthropicApiKeySecret:
   key: anthropic-api-key
 
 hpa:
+  enabled: false
   minReplicas: 2
   maxReplicas: 10
   cpuUtilization: 70
