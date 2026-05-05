@@ -1,6 +1,6 @@
 # AI Ops Platform
 
-AI-powered deployment risk analyzer built with FastAPI, Docker, Kubernetes, and GitHub Actions.
+AI-powered deployment risk analyzer built with FastAPI, Docker, Kubernetes, GitOps, and GitHub Actions.
 
 ## Architecture
 
@@ -8,10 +8,12 @@ AI-powered deployment risk analyzer built with FastAPI, Docker, Kubernetes, and 
 graph TD
     Dev[Developer] -->|git push| GH[GitHub]
     GH -->|triggers| CI[GitHub Actions CI]
+    CI -->|scans secrets| Gitleaks[Gitleaks Security Scan]
     CI -->|runs| Tests[pytest]
     CI -->|builds| Docker[Docker Image]
-    CI -->|scans| Trivy[Trivy Security Scan]
-    Docker -->|deploy| K8s[Kubernetes Cluster]
+    CI -->|scans image| Trivy[Trivy Security Scan]
+    GH -->|watches repo| ArgoCD[ArgoCD]
+    ArgoCD -->|syncs| K8s[Kubernetes Cluster]
     K8s -->|runs| API[FastAPI Service]
     API -->|risk analysis| AI{Anthropic Claude}
     AI -->|no key| Mock[Rule-based Analyzer]
@@ -25,6 +27,9 @@ graph TD
 - Graceful fallback to rule-based analysis when AI is unavailable
 - Non-root Docker image for security
 - Kubernetes-ready with resource limits and health probes
+- GitOps with ArgoCD — cluster syncs automatically on every merge
+- Helm chart with environment-specific values
+- gitleaks scans every commit for secrets before tests run
 
 ## Tech Stack
 
@@ -32,9 +37,11 @@ graph TD
 |-------|-----------|
 | API | FastAPI + Python 3.9 |
 | Container | Docker |
-| Orchestration | Kubernetes |
+| Orchestration | Kubernetes + Helm |
+| GitOps | ArgoCD |
 | CI/CD | GitHub Actions |
-| Security Scan | Trivy |
+| Secret Scanning | Gitleaks |
+| Image Scanning | Trivy |
 | AI | Anthropic Claude (optional) |
 
 ## Quick Start
@@ -91,9 +98,12 @@ Response:
 pytest tests/ -v
 ```
 
-## Kubernetes Deployment
+## Helm Deployment
 
 ```bash
-kubectl apply -f k8s/deployment.yaml
-kubectl apply -f k8s/service.yaml
+helm install ai-ops-platform ./helm/ai-ops-platform
 ```
+
+## GitOps with ArgoCD
+
+ArgoCD watches the `main` branch and syncs the cluster automatically on every merge. See `argocd/application.yaml` for configuration.
