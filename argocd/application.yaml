@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: git@github.com:gamzehelinaslan/ai-ops-platform.git
+    repoURL: https://github.com/gamzehelinaslan/ai-ops-platform.git
     targetRevision: main
     path: helm/ai-ops-platform
     helm:
