@@ -6,11 +6,14 @@ from app.analyzer import analyze_deployment
 
 load_dotenv()
 
+from prometheus_fastapi_instrumentator import Instrumentator
+
 app = FastAPI(
     title="AI Ops Platform",
     description="AI-powered deployment risk analyzer",
     version="1.0.0"
 )
+Instrumentator().instrument(app).expose(app)
 
 class DeploymentRequest(BaseModel):
     service_name: str
