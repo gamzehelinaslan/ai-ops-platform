@@ -15,10 +15,17 @@ app = FastAPI(
     version="1.1.0"
 )
 
-app_info = Info('fastapi_app', 'FastAPI application info', ['app_name'])
-app_info.labels(app_name='ai-ops-platform').info({'version': '1.1.0'})
+instrumentator = Instrumentator()
 
-Instrumentator().instrument(app).expose(app)
+app_info = Info(
+    'fastapi_app', 
+    'FastAPI application info', 
+    registry=instrumentator.registry
+)
+
+app_info.info({'app_name': 'ai-ops-platform', 'version': '1.1.1'})
+
+instrumentator.instrument(app).expose(app)
 
 class DeploymentRequest(BaseModel):
     service_name: str
@@ -39,7 +46,7 @@ def health_check():
     """Load balancer and k8s check this endpoint"""
     return {
         "status": "healthy",
-        "version": "1.0.0",
+        "version": "1.1.1",
         "ai_enabled": bool(os.getenv("ANTHROPIC_API_KEY"))
     }
 
