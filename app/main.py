@@ -1,18 +1,23 @@
+import os
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from dotenv import load_dotenv
-import os
+from prometheus_client import Info
+from prometheus_fastapi_instrumentator import Instrumentator
+
 from app.analyzer import analyze_deployment
 
 load_dotenv()
 
-from prometheus_fastapi_instrumentator import Instrumentator
-
 app = FastAPI(
     title="AI Ops Platform",
     description="AI-powered deployment risk analyzer",
-    version="1.0.0"
+    version="1.1.0"
 )
+
+app_info = Info('fastapi_app', 'FastAPI application info', ['app_name'])
+app_info.labels(app_name='ai-ops-platform').info({'version': '1.1.0'})
+
 Instrumentator().instrument(app).expose(app)
 
 class DeploymentRequest(BaseModel):
