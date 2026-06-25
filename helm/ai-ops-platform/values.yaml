@@ -2,7 +2,7 @@ replicaCount: 2
 
 image:
   repository: europe-west1-docker.pkg.dev/ai-ops-platform-500418/ai-ops-repo/ai-ops-platform
-  tag: "v1.1.1"
+  tag: "v1.1.2"
   pullPolicy: IfNotPresent
 
 service:
