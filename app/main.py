@@ -12,7 +12,7 @@ load_dotenv()
 app = FastAPI(
     title="AI Ops Platform",
     description="AI-powered deployment risk analyzer",
-    version="1.1.0"
+    version="1.1.2"
 )
 
 instrumentator = Instrumentator()
@@ -23,7 +23,7 @@ app_info = Info(
     registry=instrumentator.registry
 )
 
-app_info.info({'app_name': 'ai-ops-platform', 'version': '1.1.1'})
+app_info.info({'app_name': 'ai-ops-platform', 'version': '1.1.2'})
 
 instrumentator.instrument(app).expose(app)
 
@@ -46,7 +46,7 @@ def health_check():
     """Load balancer and k8s check this endpoint"""
     return {
         "status": "healthy",
-        "version": "1.1.1",
+        "version": "1.1.2",
         "ai_enabled": bool(os.getenv("ANTHROPIC_API_KEY"))
     }
 
