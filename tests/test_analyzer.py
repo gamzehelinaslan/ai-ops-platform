@@ -1,6 +1,11 @@
 import pytest
 from app.analyzer import analyze_deployment
 
+@pytest.fixture(autouse=True)
+def no_api_key(monkeypatch):
+    """Hide the API key during tests so they use the rule-based analyzer and cost nothing."""
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+
 @pytest.mark.asyncio
 async def test_mock_high_risk():
     """Production + latest tag + incidents = HIGH risk expectation"""

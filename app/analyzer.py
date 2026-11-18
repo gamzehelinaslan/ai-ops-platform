@@ -1,16 +1,34 @@
+import json
+import logging
 import os
+
 import anthropic
 
+logger = logging.getLogger(__name__)
+
+# The model can be changed without touching the code, e.g. AI_MODEL=claude-sonnet-5-5
+MODEL = os.getenv("AI_MODEL", "claude-haiku-5-5")
+
+
 async def analyze_deployment(deployment_data: dict) -> dict:
-    """Returns risk analysis. Uses mock if ANTHROPIC_API_KEY not set"""
+    """Returns risk analysis. Falls back to rule-based analysis if AI is unavailable."""
     api_key = os.getenv("ANTHROPIC_API_KEY")
-    
+
     if not api_key:
-        # No API key — return rule-based analysis
+        # No API key: use rule-based analysis
         return _mock_analysis(deployment_data)
-    
+
+    try:
+        return _ai_analysis(deployment_data, api_key)
+    except Exception as e:
+        # API error, timeout or invalid JSON: fall back instead of failing
+        logger.warning("AI analysis failed, using rule-based fallback: %s", e)
+        return _mock_analysis(deployment_data)
+
+
+def _ai_analysis(deployment_data: dict, api_key: str) -> dict:
     client = anthropic.Anthropic(api_key=api_key)
-    
+
     prompt = f"""
     You are a DevOps risk assessment AI. Analyze this deployment and respond in JSON only.
     
@@ -29,16 +47,14 @@ async def analyze_deployment(deployment_data: dict) -> dict:
         "recommendations": ["<action1>", "<action2>"]
     }}
     """
-    
+
     message = client.messages.create(
-        model="claude-sonnet-4-20250514",
+        model=MODEL,
         max_tokens=500,
         messages=[{"role": "user", "content": prompt}]
     )
-    
-    import json
-    response_text = message.content[0].text
-    parsed = json.loads(response_text)
+
+    parsed = json.loads(message.content[0].text)
     parsed["mock_mode"] = False
     return parsed
 
