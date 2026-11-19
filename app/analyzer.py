@@ -50,13 +50,33 @@ def _ai_analysis(deployment_data: dict, api_key: str) -> dict:
 
     message = client.messages.create(
         model=MODEL,
-        max_tokens=500,
+        max_tokens=1024,
         messages=[{"role": "user", "content": prompt}]
     )
 
-    parsed = json.loads(message.content[0].text)
+    parsed = _extract_json(message)
     parsed["mock_mode"] = False
     return parsed
+
+def _extract_json(message) -> dict:
+    """Finds the JSON object in the model's reply, or raises a clear error explaining why it couldn't."""
+    # Join the text of all text blocks; a reply can contain other block types too
+    text = "".join(block.text for block in message.content if block.type == "text")
+    if message.stop_reason == "max_tokens":
+        raise ValueError("reply was cut off by max_tokens")
+
+    if not text:
+        block_types = [block.type for block in message.content]
+        raise ValueError(f"no text in reply (stop_reason={message.stop_reason}, blocks={block_types})")
+
+    # Take everything between the first '{' and the last '}', in case the model added extra text around it
+    start = text.find("{")
+    end = text.rfind("}")
+    if start == -1 or end == -1:
+        raise ValueError(f"no JSON in reply: {text[:100]}")
+
+    return json.loads(text[start:end + 1])
+
 
 def _mock_analysis(deployment_data: dict) -> dict:
     """Rule-based risk analysis when AI is unavailable"""
