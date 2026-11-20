@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from prometheus_client import Info
 from prometheus_fastapi_instrumentator import Instrumentator
 
-from app.analyzer import analyze_deployment
+from app.analyzer import analyze_deployment, InvalidDeploymentInput
 
 load_dotenv()
 
@@ -56,6 +56,9 @@ async def analyze(request: DeploymentRequest):
     try:
         result = await analyze_deployment(request.dict())
         return result
+    except InvalidDeploymentInput as e:
+        # Defense 1: reject input that does not look like real deployment data
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
